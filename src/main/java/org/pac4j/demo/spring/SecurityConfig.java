@@ -252,7 +252,7 @@ public class SecurityConfig {
 
     @Configuration
     @Order(14)
-    public static class CallbackWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
         private Config config;
@@ -263,22 +263,9 @@ public class SecurityConfig {
             callbackFilter.setMultiProfile(true);
 
             http
-                    .antMatcher("/callback*")
-                    .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
-                    .csrf().disable();
-        }
-    }
-
-    @Configuration
-    @Order(15)
-    public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            http
                     .antMatcher("/**")
+                    .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
                     .csrf().disable()
-                    .headers().disable()
                     .logout()
                     .logoutSuccessUrl("/");
         }
