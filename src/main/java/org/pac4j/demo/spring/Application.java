@@ -96,7 +96,16 @@ public class Application {
 
     @RequestMapping("/saml/index.html")
     public String saml(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
-        return protectedIndex(request, response, map);
+        final WebContext context = new J2EContext(request, response);
+        map.put("profiles", getProfiles(context));
+        return "samlIndex";
+    }
+
+    @RequestMapping("/saml/admin.html")
+    public String samlAdmin(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
+        final WebContext context = new J2EContext(request, response);
+        map.put("profiles", getProfiles(context));
+        return "samlAdmin";
     }
 
     @RequestMapping("/oidc/index.html")

@@ -2,6 +2,7 @@ package org.pac4j.demo.spring;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.springframework.security.web.CallbackFilter;
+import org.pac4j.springframework.security.web.Pac4jEntryPoint;
 import org.pac4j.springframework.security.web.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -97,10 +98,14 @@ public class SecurityConfig {
 
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final SecurityFilter filter = new SecurityFilter(config, "FormClient");
+            final SecurityFilter filter = new SecurityFilter(config, "DirectBasicAuthClient,AnonymousClient");
 
             http
                     .antMatcher("/form/**")
+                        .authorizeRequests().anyRequest().authenticated()
+                    .and()
+                    .exceptionHandling().authenticationEntryPoint(new Pac4jEntryPoint(config, "FormClient"))
+                    .and()
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         }
@@ -126,24 +131,6 @@ public class SecurityConfig {
 
     @Configuration
     @Order(7)
-    public static class CasWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "CasClient");
-
-            http
-                    .antMatcher("/cas/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(8)
     public static class Saml2WebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -155,13 +142,17 @@ public class SecurityConfig {
 
             http
                     .antMatcher("/saml/**")
+                    .authorizeRequests()
+                        .antMatchers("/saml/admin.html").hasRole("ADMIN")
+                        .antMatchers("/saml/**").authenticated()
+                    .and()
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         }
     }
 
     @Configuration
-    @Order(9)
+    @Order(8)
     public static class GoogleOidcWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -179,7 +170,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(10)
+    @Order(9)
     public static class GoogleWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -197,7 +188,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(11)
+    @Order(10)
     public static class ProtectedWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -215,7 +206,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(12)
+    @Order(11)
     public static class JwtWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -233,7 +224,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(13)
+    @Order(12)
     public static class DbaWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -251,7 +242,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(14)
+    @Order(13)
     public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -263,11 +254,16 @@ public class SecurityConfig {
             callbackFilter.setMultiProfile(true);
 
             http
-                    .antMatcher("/**")
+                    .authorizeRequests()
+                        .antMatchers("/cas/**").authenticated()
+                        .anyRequest().permitAll()
+                    .and()
+                    .exceptionHandling().authenticationEntryPoint(new Pac4jEntryPoint(config, "CasClient"))
+                    .and()
                     .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
                     .csrf().disable()
                     .logout()
-                    .logoutSuccessUrl("/");
+                        .logoutSuccessUrl("/");
         }
     }
 }
