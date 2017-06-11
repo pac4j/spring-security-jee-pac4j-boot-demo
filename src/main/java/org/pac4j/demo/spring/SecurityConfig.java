@@ -2,6 +2,7 @@ package org.pac4j.demo.spring;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.springframework.security.web.CallbackFilter;
+import org.pac4j.springframework.security.web.LogoutFilter;
 import org.pac4j.springframework.security.web.Pac4jEntryPoint;
 import org.pac4j.springframework.security.web.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,6 +244,46 @@ public class SecurityConfig {
 
     @Configuration
     @Order(13)
+    public static class Pac4jLogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private Config config;
+
+        protected void configure(final HttpSecurity http) throws Exception {
+
+            final LogoutFilter filter = new LogoutFilter(config, "/?defaulturlafterlogout");
+            filter.setDestroySession(true);
+
+            http
+                    .antMatcher("/pac4jLogout")
+                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+        }
+    }
+
+    @Configuration
+    @Order(14)
+    public static class Pac4jCentralLogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private Config config;
+
+        protected void configure(final HttpSecurity http) throws Exception {
+
+            final LogoutFilter filter = new LogoutFilter(config, "http://localhost:8080/?defaulturlafterlogoutafteridp");
+            filter.setLocalLogout(false);
+            filter.setCentralLogout(true);
+            filter.setLogoutUrlPattern("http://localhost:8080/.*");
+
+            http
+                    .antMatcher("/pac4jCentralLogout")
+                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+        }
+    }
+
+    @Configuration
+    @Order(15)
     public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired

@@ -9,6 +9,8 @@ import org.pac4j.core.exception.HttpAction;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.http.client.indirect.FormClient;
+import org.pac4j.jwt.config.encryption.SecretEncryptionConfiguration;
+import org.pac4j.jwt.config.signature.SecretSignatureConfiguration;
 import org.pac4j.jwt.profile.JwtGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,9 @@ import java.util.Optional;
 @Controller
 public class Application {
 
+    private static final String PROFILES = "profiles";
+    private static final String SESSION_ID = "sessionId";
+
     @Value("${salt}")
     private String salt;
 
@@ -38,7 +43,8 @@ public class Application {
     @RequestMapping("/index.html")
     public String index(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) throws HttpAction {
         final WebContext context = new J2EContext(request, response);
-        map.put("profiles", getProfiles(context));
+        map.put(PROFILES, getProfiles(context));
+        map.put(SESSION_ID, context.getSessionIdentifier());
         return "index";
     }
 
@@ -55,7 +61,7 @@ public class Application {
     @RequestMapping("/facebook/notprotected.html")
     public String facebookNotProtected(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
         final WebContext context = new J2EContext(request, response);
-        map.put("profiles", getProfiles(context));
+        map.put(PROFILES, getProfiles(context));
         return "notProtected";
     }
 
@@ -97,14 +103,14 @@ public class Application {
     @RequestMapping("/saml/index.html")
     public String saml(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
         final WebContext context = new J2EContext(request, response);
-        map.put("profiles", getProfiles(context));
+        map.put(PROFILES, getProfiles(context));
         return "samlIndex";
     }
 
     @RequestMapping("/saml/admin.html")
     public String samlAdmin(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
         final WebContext context = new J2EContext(request, response);
-        map.put("profiles", getProfiles(context));
+        map.put(PROFILES, getProfiles(context));
         return "samlAdmin";
     }
 
@@ -130,7 +136,7 @@ public class Application {
 
     @RequestMapping("/jwt.html")
     public String jwt(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
-        final JwtGenerator generator = new JwtGenerator(salt);
+        final JwtGenerator generator = new JwtGenerator(new SecretSignatureConfiguration(salt), new SecretEncryptionConfiguration(salt));
         final WebContext context = new J2EContext(request, response);
         String token = "";
         final ProfileManager manager = new ProfileManager(context);
@@ -163,7 +169,7 @@ public class Application {
 
     protected String protectedIndex(HttpServletRequest request, HttpServletResponse response, Map<String, Object> map) {
         final WebContext context = new J2EContext(request, response);
-        map.put("profiles", getProfiles(context));
+        map.put(PROFILES, getProfiles(context));
         return "protectedIndex";
     }
 }
