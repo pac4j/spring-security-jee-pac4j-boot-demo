@@ -243,46 +243,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(13)
-    public static class Pac4jLogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final LogoutFilter filter = new LogoutFilter(config, "/?defaulturlafterlogout");
-            filter.setDestroySession(true);
-
-            http
-                    .antMatcher("/pac4jLogout")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
-        }
-    }
-
-    @Configuration
-    @Order(14)
-    public static class Pac4jCentralLogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final LogoutFilter filter = new LogoutFilter(config, "http://localhost:8080/?defaulturlafterlogoutafteridp");
-            filter.setLocalLogout(false);
-            filter.setCentralLogout(true);
-            filter.setLogoutUrlPattern("http://localhost:8080/.*");
-
-            http
-                    .antMatcher("/pac4jCentralLogout")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
-        }
-    }
-
-    @Configuration
     @Order(15)
     public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
@@ -294,6 +254,16 @@ public class SecurityConfig {
             final CallbackFilter callbackFilter = new CallbackFilter(config);
             callbackFilter.setMultiProfile(true);
 
+            final LogoutFilter logoutFilter = new LogoutFilter(config, "/?defaulturlafterlogout");
+            logoutFilter.setDestroySession(true);
+            logoutFilter.setSuffix("/pac4jLogout");
+
+            final LogoutFilter centralLogoutFilter = new LogoutFilter(config, "http://localhost:8080/?defaulturlafterlogoutafteridp");
+            centralLogoutFilter.setLocalLogout(false);
+            centralLogoutFilter.setCentralLogout(true);
+            centralLogoutFilter.setLogoutUrlPattern("http://localhost:8080/.*");
+            centralLogoutFilter.setSuffix("/pac4jCentralLogout");
+
             http
                     .authorizeRequests()
                         .antMatchers("/cas/**").authenticated()
@@ -302,6 +272,8 @@ public class SecurityConfig {
                     .exceptionHandling().authenticationEntryPoint(new Pac4jEntryPoint(config, "CasClient"))
                     .and()
                     .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
+                    .addFilterBefore(logoutFilter, CallbackFilter.class)
+                    .addFilterAfter(centralLogoutFilter, CallbackFilter.class)
                     .csrf().disable()
                     .logout()
                         .logoutSuccessUrl("/");
