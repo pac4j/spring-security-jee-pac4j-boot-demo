@@ -22,11 +22,15 @@ import org.pac4j.oidc.client.GoogleOidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.client.SAML2ClientConfiguration;
+import org.pac4j.springframework.annotation.AnnotationConfig;
+import org.pac4j.springframework.component.ComponentConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import({ComponentConfig.class, AnnotationConfig.class})
 public class Pac4jConfig {
 
     @Value("${salt}")

@@ -45,7 +45,7 @@ public class SecurityConfig {
 
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final SecurityFilter filter = new SecurityFilter(config, "FacebookClient", "admin");
+            final SecurityFilter filter = new SecurityFilter(config, "FacebookClient"); //, "admin");
 
             http
                     .antMatcher("/facebookadmin/**")
