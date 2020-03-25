@@ -2,11 +2,12 @@ package org.pac4j.demo.spring;
 
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.J2EContext;
-import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.exception.HttpAction;
+import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.exception.http.HttpAction;
+import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.http.client.indirect.FormClient;
 import org.pac4j.jwt.config.encryption.SecretEncryptionConfiguration;
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration;
@@ -35,7 +36,7 @@ public class Application {
     private Config config;
 
     @Autowired
-    private J2EContext j2EContext;
+    private JEEContext jeeContext;
 
     @Autowired
     private ProfileManager profileManager;
@@ -48,7 +49,7 @@ public class Application {
     @RequestMapping("/index.html")
     public String index(Map<String, Object> map) throws HttpAction {
         map.put(PROFILES, profileManager.getAll(true));
-        map.put(SESSION_ID, j2EContext.getSessionStore().getOrCreateSessionId(j2EContext));
+        map.put(SESSION_ID, jeeContext.getSessionStore().getOrCreateSessionId(jeeContext));
         return "index";
     }
 
@@ -145,7 +146,7 @@ public class Application {
 
     @RequestMapping("/loginForm")
     public String loginForm(Map<String, Object> map) {
-        final FormClient formClient = (FormClient) config.getClients().findClient("FormClient");
+        final FormClient formClient = (FormClient) config.getClients().findClient("FormClient").get();
         map.put("callbackUrl", formClient.getCallbackUrl());
         return "form";
     }
@@ -154,11 +155,14 @@ public class Application {
     @ResponseBody
     public String forceLogin() {
 
-        final Client client = config.getClients().findClient(j2EContext.getRequestParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER));
+        final Client client = config.getClients().findClient(jeeContext.getRequestParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER).get()).get();
+        HttpAction action;
         try {
-            client.redirect(j2EContext);
+            action = (HttpAction) client.getRedirectionAction(jeeContext).get();
         } catch (final HttpAction e) {
+            action = e;
         }
+        JEEHttpActionAdapter.INSTANCE.adapt(action, jeeContext);
         return null;
     }
 
@@ -168,7 +172,7 @@ public class Application {
     }
 
     @ExceptionHandler(HttpAction.class)
-    public void httpAction() {
-        // do nothing
+    public void httpAction(final HttpAction action) {
+        JEEHttpActionAdapter.INSTANCE.adapt(action, jeeContext);
     }
 }
