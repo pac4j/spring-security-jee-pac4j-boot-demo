@@ -66,7 +66,7 @@ public class Pac4jConfig {
 
         final SimpleTestUsernamePasswordAuthenticator simpleTestUsernamePasswordAuthenticator = new SimpleTestUsernamePasswordAuthenticator();
         // HTTP
-        final FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", simpleTestUsernamePasswordAuthenticator);
+        final FormClient formClient = new FormClient("http://localhost:8080/loginForm", simpleTestUsernamePasswordAuthenticator);
         final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(simpleTestUsernamePasswordAuthenticator);
 
         // CAS
