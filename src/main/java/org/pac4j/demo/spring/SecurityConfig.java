@@ -27,7 +27,7 @@ public class SecurityConfig {
         protected void configure(final HttpSecurity http) throws Exception {
 
             final SecurityFilter filter = new SecurityFilter(config, "FacebookClient");
-            filter.setMatchers("excludedPath");
+            filter.setMatchers("+excludedPath");
 
             http
                     .antMatcher("/facebook/**")
@@ -252,7 +252,6 @@ public class SecurityConfig {
         protected void configure(final HttpSecurity http) throws Exception {
 
             final CallbackFilter callbackFilter = new CallbackFilter(config);
-            callbackFilter.setMultiProfile(true);
 
             final LogoutFilter logoutFilter = new LogoutFilter(config, "/?defaulturlafterlogout");
             logoutFilter.setDestroySession(true);

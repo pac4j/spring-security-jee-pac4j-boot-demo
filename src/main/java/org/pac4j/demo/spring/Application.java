@@ -5,14 +5,14 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.http.client.indirect.FormClient;
 import org.pac4j.jwt.config.encryption.SecretEncryptionConfiguration;
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration;
 import org.pac4j.jwt.profile.JwtGenerator;
-import org.pac4j.springframework.annotation.ui.RequireAnyRole;
+import org.pac4j.springframework.annotation.RequireAnyRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -48,8 +48,8 @@ public class Application {
 
     @RequestMapping("/index.html")
     public String index(Map<String, Object> map) throws HttpAction {
-        map.put(PROFILES, profileManager.getAll(true));
-        map.put(SESSION_ID, jeeContext.getSessionStore().getOrCreateSessionId(jeeContext));
+        map.put(PROFILES, profileManager.getProfiles());
+        map.put(SESSION_ID, jeeContext.getSessionStore().getSessionId(jeeContext, false).orElse("nosession"));
         return "index";
     }
 
@@ -60,7 +60,7 @@ public class Application {
 
     @RequestMapping("/facebook/notprotected.html")
     public String facebookNotProtected(Map<String, Object> map) {
-        map.put(PROFILES, profileManager.getAll(true));
+        map.put(PROFILES, profileManager.getProfiles());
         return "notProtected";
     }
 
@@ -102,13 +102,13 @@ public class Application {
 
     @RequestMapping("/saml/index.html")
     public String saml(Map<String, Object> map) {
-        map.put(PROFILES, profileManager.getAll(true));
+        map.put(PROFILES, profileManager.getProfiles());
         return "samlIndex";
     }
 
     @RequestMapping("/saml/admin.html")
     public String samlAdmin(Map<String, Object> map) {
-        map.put(PROFILES, profileManager.getAll(true));
+        map.put(PROFILES, profileManager.getProfiles());
         return "samlAdmin";
     }
 
@@ -136,7 +136,7 @@ public class Application {
     public String jwt(Map<String, Object> map) {
         final JwtGenerator generator = new JwtGenerator(new SecretSignatureConfiguration(salt), new SecretEncryptionConfiguration(salt));
         String token = "";
-        final Optional<CommonProfile> profile = profileManager.get(true);
+        final Optional<UserProfile> profile = profileManager.getProfile();
         if (profile.isPresent()) {
             token = generator.generate(profile.get());
         }
@@ -158,7 +158,7 @@ public class Application {
         final Client client = config.getClients().findClient(jeeContext.getRequestParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER).get()).get();
         HttpAction action;
         try {
-            action = (HttpAction) client.getRedirectionAction(jeeContext).get();
+            action = client.getRedirectionAction(jeeContext).get();
         } catch (final HttpAction e) {
             action = e;
         }
@@ -167,7 +167,7 @@ public class Application {
     }
 
     protected String protectedIndex(Map<String, Object> map) {
-        map.put(PROFILES, profileManager.getAll(true));
+        map.put(PROFILES, profileManager.getProfiles());
         return "protectedIndex";
     }
 
