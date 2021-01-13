@@ -3,6 +3,7 @@ package org.pac4j.demo.spring;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.context.session.JEESessionStore;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.profile.ProfileManager;
@@ -49,7 +50,7 @@ public class Application {
     @RequestMapping("/index.html")
     public String index(Map<String, Object> map) throws HttpAction {
         map.put(PROFILES, profileManager.getProfiles());
-        map.put(SESSION_ID, jeeContext.getSessionStore().getSessionId(jeeContext, false).orElse("nosession"));
+        map.put(SESSION_ID, JEESessionStore.INSTANCE.getSessionId(jeeContext, false).orElse("nosession"));
         return "index";
     }
 
@@ -158,7 +159,7 @@ public class Application {
         final Client client = config.getClients().findClient(jeeContext.getRequestParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER).get()).get();
         HttpAction action;
         try {
-            action = client.getRedirectionAction(jeeContext).get();
+            action = client.getRedirectionAction(jeeContext, JEESessionStore.INSTANCE).get();
         } catch (final HttpAction e) {
             action = e;
         }
