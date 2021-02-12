@@ -11,4 +11,8 @@ Build the project and launch the web app with jetty on [http://localhost:8080](h
     cd spring-security-pac4j-boot-demo
     mvn clean compile exec:java
 
+or
+
+    mvn clean compile spring-boot:run
+
 To test, you can call a protected url by clicking on the "Protected url by **xxx**" link, which will start the authentication process with the **xxx** provider.
