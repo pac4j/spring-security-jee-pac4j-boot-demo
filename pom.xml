@@ -28,7 +28,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <spring-security-pac4j.version>7.0.0-SNAPSHOT</spring-security-pac4j.version>
+        <spring-security-pac4j.version>7.0.0</spring-security-pac4j.version>
         <pac4j.version>5.4.0-SNAPSHOT</pac4j.version>
         <spring-webmvc-pac4j.version>6.0.0-SNAPSHOT</spring-webmvc-pac4j.version>
     </properties>
