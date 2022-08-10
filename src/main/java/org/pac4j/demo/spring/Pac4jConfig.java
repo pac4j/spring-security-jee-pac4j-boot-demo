@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Import;
 import java.util.Optional;
 
 @Configuration
-@Import({ComponentConfig.class, AnnotationConfig.class})
+@Import(ComponentConfig.class)
 public class Pac4jConfig {
 
     @Bean
