@@ -3,15 +3,18 @@ package org.pac4j.demo.spring;
 import org.pac4j.core.config.Config;
 import org.pac4j.springframework.security.web.CallbackFilter;
 import org.pac4j.springframework.security.web.LogoutFilter;
-import org.pac4j.springframework.security.web.Pac4jEntryPoint;
 import org.pac4j.springframework.security.web.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
@@ -19,61 +22,6 @@ public class SecurityConfig {
 
     @Configuration
     @Order(1)
-    public static class FacebookWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "FacebookClient");
-            filter.setMatchers("+excludedPath");
-
-            http
-                    .antMatcher("/facebook/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(2)
-    public static class FacebookAdminWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "FacebookClient"); //, "admin");
-
-            http
-                    .antMatcher("/facebookadmin/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(3)
-    public static class FacebookCustomWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "FacebookClient", "custom");
-
-            http
-                    .antMatcher("/facebookcustom/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(4)
     public static class TwitterWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -81,7 +29,7 @@ public class SecurityConfig {
 
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final SecurityFilter filter = new SecurityFilter(config, "TwitterClient,FacebookClient");
+            final SecurityFilter filter = new SecurityFilter(config, "TwitterClient");
 
             http
                     .antMatcher("/twitter/**")
@@ -91,105 +39,25 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(5)
-    public static class FormWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    @Order(2)
+    public static class CasWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
         private Config config;
 
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final SecurityFilter filter = new SecurityFilter(config, "DirectBasicAuthClient,AnonymousClient");
+            final SecurityFilter filter = new SecurityFilter(config, "CasClient");
 
             http
-                    .antMatcher("/form/**")
-                        .authorizeRequests().anyRequest().authenticated()
-                    .and()
-                    .exceptionHandling().authenticationEntryPoint(new Pac4jEntryPoint(config, "FormClient"))
-                    .and()
+                    .antMatcher("/cas/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         }
     }
 
     @Configuration
-    @Order(6)
-    public static class BasicAuthWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "IndirectBasicAuthClient");
-
-            http
-                    .antMatcher("/basicauth/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(7)
-    public static class Saml2WebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "Saml2Client");
-
-            http
-                    .antMatcher("/saml/**")
-                    .authorizeRequests()
-                        .antMatchers("/saml/admin.html").hasRole("ADMIN")
-                        .antMatchers("/saml/**").authenticated()
-                    .and()
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(8)
-    public static class GoogleOidcWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "GoogleOidcClient");
-
-            http
-                    .antMatcher("/oidc/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(9)
-    public static class GoogleWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "Google2Client");
-
-            http
-                    .antMatcher("/google/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-        }
-    }
-
-    @Configuration
-    @Order(10)
+    @Order(3)
     public static class ProtectedWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -207,25 +75,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(11)
-    public static class JwtWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Autowired
-        private Config config;
-
-        protected void configure(final HttpSecurity http) throws Exception {
-
-            final SecurityFilter filter = new SecurityFilter(config, "ParameterClient");
-
-            http
-                    .antMatcher("/rest-jwt/**")
-                    .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
-        }
-    }
-
-    @Configuration
-    @Order(12)
+    @Order(4)
     public static class DbaWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -233,7 +83,7 @@ public class SecurityConfig {
 
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final SecurityFilter filter = new SecurityFilter(config, "DirectBasicAuthClient,ParameterClient");
+            final SecurityFilter filter = new SecurityFilter(config, "DirectBasicAuthClient");
 
             http
                     .antMatcher("/dba/**")
@@ -243,8 +93,8 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(15)
-    public static class DefaultWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    @Order(5)
+    public static class CallbackWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
         private Config config;
@@ -253,29 +103,67 @@ public class SecurityConfig {
 
             final CallbackFilter callbackFilter = new CallbackFilter(config);
 
+            http
+                    .antMatcher("/callback*")
+                    .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
+                    .csrf().disable();
+        }
+    }
+
+    @Configuration
+    @Order(6)
+    public static class LogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private Config config;
+
+        protected void configure(final HttpSecurity http) throws Exception {
+
             final LogoutFilter logoutFilter = new LogoutFilter(config, "/?defaulturlafterlogout");
             logoutFilter.setDestroySession(true);
-            logoutFilter.setSuffix("/pac4jLogout");
-
-            final LogoutFilter centralLogoutFilter = new LogoutFilter(config, "http://localhost:8080/?defaulturlafterlogoutafteridp");
-            centralLogoutFilter.setLocalLogout(false);
-            centralLogoutFilter.setCentralLogout(true);
-            centralLogoutFilter.setLogoutUrlPattern("http://localhost:8080/.*");
-            centralLogoutFilter.setSuffix("/pac4jCentralLogout");
 
             http
-                    .authorizeRequests()
-                        .antMatchers("/cas/**").authenticated()
-                        .anyRequest().permitAll()
-                    .and()
-                    .exceptionHandling().authenticationEntryPoint(new Pac4jEntryPoint(config, "CasClient"))
-                    .and()
-                    .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
-                    .addFilterBefore(logoutFilter, CallbackFilter.class)
-                    .addFilterAfter(centralLogoutFilter, CallbackFilter.class)
+                    .antMatcher("/pac4jLogout")
+                    .addFilterBefore(logoutFilter, BasicAuthenticationFilter.class)
+                    .csrf().disable();
+        }
+    }
+
+    @Configuration
+    @Order(7)
+    public static class SpringSecurityWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private Config config;
+
+        protected void configure(final HttpSecurity http) throws Exception {
+
+            http
                     .csrf().disable()
-                    .logout()
-                        .logoutSuccessUrl("/");
+                    .authorizeRequests()
+                    .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers("/login/**").authenticated()
+                    .anyRequest().permitAll()
+                    .and()
+                    .formLogin()
+                    .loginPage("/login.html")
+                    .loginProcessingUrl("/perform_login")
+                    .defaultSuccessUrl("/index.html", false)
+                    .failureUrl("/login.html?error=true")
+                    .and()
+                    .logout().logoutSuccessUrl("/");
+        }
+
+        protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+            auth.inMemoryAuthentication()
+                    .withUser("user").password(passwordEncoder().encode("user")).roles("USER")
+                    .and()
+                    .withUser("admin").password(passwordEncoder().encode("admin")).roles("ADMIN");
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
         }
     }
 }

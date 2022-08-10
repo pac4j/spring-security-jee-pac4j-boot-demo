@@ -1,5 +1,3 @@
-salt: 12345678901234567890123456789012
-
-logging.level.org.pac4j.core.engine: DEBUG
+logging.level.org.pac4j: DEBUG
 
 spring.mustache.suffix: .html
