@@ -1,9 +1,9 @@
 package org.pac4j.demo.spring;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.springframework.security.web.CallbackFilter;
-import org.pac4j.springframework.security.web.LogoutFilter;
-import org.pac4j.springframework.security.web.SecurityFilter;
+import org.pac4j.jee.filter.CallbackFilter;
+import org.pac4j.jee.filter.LogoutFilter;
+import org.pac4j.jee.filter.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

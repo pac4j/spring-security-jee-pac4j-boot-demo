@@ -2,7 +2,6 @@ package org.pac4j.demo.spring;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.exception.http.HttpAction;
-import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.context.JEEContext;
 import org.pac4j.jee.context.session.JEESessionStore;
 import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
