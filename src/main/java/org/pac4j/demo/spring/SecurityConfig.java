@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class SecurityConfig {
 
-/*    @Configuration
+    @Configuration
     @Order(1)
     public static class TwitterWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
@@ -36,7 +36,7 @@ public class SecurityConfig {
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         }
-    }*/
+    }
 
     @Configuration
     @Order(2)
@@ -91,7 +91,7 @@ public class SecurityConfig {
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
         }
     }
-/*
+
     @Configuration
     @Order(5)
     public static class CallbackWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
@@ -128,7 +128,7 @@ public class SecurityConfig {
                     .csrf().disable();
         }
     }
-*/
+
     @Configuration
     @Order(7)
     public static class SpringSecurityWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {

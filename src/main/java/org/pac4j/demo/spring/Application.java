@@ -6,12 +6,15 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.context.JEEContext;
 import org.pac4j.jee.context.session.JEESessionStore;
 import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
+import org.pac4j.springframework.security.profile.SpringSecurityProfileManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Controller
@@ -24,19 +27,15 @@ public class Application {
     @Autowired
     private Config config;
 
-    @Autowired
-    private JEEContext jeeContext;
-
-    @Autowired
-    private ProfileManager profileManager;
-
     @RequestMapping("/")
-    public String root(Map<String, Object> map) throws HttpAction {
-        return index(map);
+    public String root(final Map<String, Object> map, final HttpServletRequest request, final HttpServletResponse response) throws HttpAction {
+        return index(map, request, response);
     }
 
     @RequestMapping("/index.html")
-    public String index(Map<String, Object> map) throws HttpAction {
+    public String index(Map<String, Object> map, final HttpServletRequest request, final HttpServletResponse response) throws HttpAction {
+        final JEEContext jeeContext = new JEEContext(request, response);
+        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, JEESessionStore.INSTANCE);
         map.put(PROFILES, profileManager.getProfiles());
         map.put(CONTEXT, SecurityContextHolder.getContext());
         map.put(SESSION_ID, JEESessionStore.INSTANCE.getSessionId(jeeContext, false).orElse("nosession"));
@@ -50,14 +49,17 @@ public class Application {
 
     @RequestMapping(value = {"/twitter/index.html", "/cas/index.html", "/dba/index.html",
             "/protected/index.html", "/admin/index.html", "/login/index.html"})
-    public String twitter(Map<String, Object> map) {
+    public String twitter(Map<String, Object> map, final HttpServletRequest request, final HttpServletResponse response) {
+        final JEEContext jeeContext = new JEEContext(request, response);
+        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, JEESessionStore.INSTANCE);
         map.put(PROFILES, profileManager.getProfiles());
         map.put(CONTEXT, SecurityContextHolder.getContext());
         return "protectedIndex";
     }
 
     @ExceptionHandler(HttpAction.class)
-    public void httpAction(final HttpAction action) {
+    public void httpAction(final HttpAction action, final HttpServletRequest request, final HttpServletResponse response) {
+        final JEEContext jeeContext = new JEEContext(request, response);
         JEEHttpActionAdapter.INSTANCE.adapt(action, jeeContext);
     }
 }

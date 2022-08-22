@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Import;
 import java.util.Optional;
 
 @Configuration
-@Import(ComponentConfig.class)
 public class Pac4jConfig {
 
     @Bean
@@ -47,33 +46,5 @@ public class Pac4jConfig {
         final Config config = new Config(clients);
         config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
         return config;
-    }
-
-    @Bean
-    public FilterRegistrationBean callbackFilter() {
-        final CallbackFilter filter = new CallbackFilter(config());
-        final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-        registrationBean.setFilter(filter);
-        registrationBean.addUrlPatterns("/callback");
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean logoutFilter() {
-        final LogoutFilter filter = new LogoutFilter(config(), "/?defaulturlafterlogout");
-        filter.setDestroySession(true);
-        final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-        registrationBean.setFilter(filter);
-        registrationBean.addUrlPatterns("/pac4jLogout");
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean twitterFilter() {
-        final SecurityFilter filter = new SecurityFilter(config(), "TwitterClient");
-        final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-        registrationBean.setFilter(filter);
-        registrationBean.addUrlPatterns("/twitter/index.html");
-        return registrationBean;
     }
 }
