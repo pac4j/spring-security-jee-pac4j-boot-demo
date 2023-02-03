@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pac4j.demo</groupId>
     <artifactId>spring-security-jee-pac4j-boot-demo</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Spring Security boot demo using spring-security-pac4j + javaee-pac4j</name>
 
@@ -27,10 +27,10 @@
     </parent>
 
     <properties>
-        <java.version>11</java.version>
-        <spring-security-pac4j.version>8.0.0</spring-security-pac4j.version>
-        <javaee-pac4j.version>7.1.0</javaee-pac4j.version>
-        <pac4j.version>5.7.0</pac4j.version>
+        <java.version>17</java.version>
+        <spring-security-pac4j.version>10.0.0-SNAPSHOT</spring-security-pac4j.version>
+        <jakartaee-pac4j.version>8.0.0-SNAPSHOT</jakartaee-pac4j.version>
+        <pac4j.version>6.0.0-RC6-SNAPSHOT</pac4j.version>
     </properties>
 
     <dependencies>
@@ -51,13 +51,13 @@
 
         <dependency>
             <groupId>org.pac4j</groupId>
-            <artifactId>javaee-pac4j</artifactId>
-            <version>${javaee-pac4j.version}</version>
+            <artifactId>jakartaee-pac4j</artifactId>
+            <version>${jakartaee-pac4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-javaee</artifactId>
+            <artifactId>pac4j-jakartaee</artifactId>
             <version>${pac4j.version}</version>
         </dependency>
         <dependency>

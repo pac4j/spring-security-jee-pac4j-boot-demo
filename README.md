@@ -4,7 +4,7 @@
 
 This `spring-security-jee-pac4j-boot-demo` project is a Spring Security boot demo using:
 - Spring Security + Spring Boot
-- the [javaee-pac4j](https://github.com/pac4j/jee-pac4j) security library
+- the [jakartaee-pac4j](https://github.com/pac4j/jee-pac4j) security library
 - the [spring-security-pac4j](https://github.com/pac4j/spring-security-pac4j) bridge from pac4j to Spring Security.
 
 ## Run and test

@@ -1,3 +1,4 @@
-logging.level.org.pac4j: DEBUG
+logging.level.org.pac4j.core.engine: DEBUG
+logging.level.org.pac4j.core.adapter: DEBUG
 
 spring.mustache.suffix: .html

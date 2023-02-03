@@ -24,7 +24,7 @@ public class Pac4jConfig {
 
         final CasConfiguration casConfiguration = new CasConfiguration("https://casserverpac4j.herokuapp.com/login");
         final CasClient casClient = new CasClient(casConfiguration);
-        casClient.setAuthorizationGenerator( (ctx, session, profile) -> {
+        casClient.setAuthorizationGenerator( (ctx, profile) -> {
             profile.addRole("ROLE_ADMIN");
             return Optional.of(profile);
         });

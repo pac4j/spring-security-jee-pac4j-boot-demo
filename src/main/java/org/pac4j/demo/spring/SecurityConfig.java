@@ -8,13 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
@@ -22,127 +22,143 @@ public class SecurityConfig {
 
     @Configuration
     @Order(1)
-    public static class TwitterWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class TwitterWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
-
+        @Bean
+        public SecurityFilterChain twitterFilterChain(final HttpSecurity http) throws Exception {
             final SecurityFilter filter = new SecurityFilter(config, "TwitterClient");
 
             http
-                    .antMatcher("/twitter/**")
+                    .securityMatcher("/twitter/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(2)
-    public static class CasWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class CasWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
-
+        @Bean
+        public SecurityFilterChain casFilterChain(final HttpSecurity http) throws Exception {
             final SecurityFilter filter = new SecurityFilter(config, "CasClient");
 
             http
-                    .antMatcher("/cas/**")
+                    .securityMatcher("/cas/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(3)
-    public static class ProtectedWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class ProtectedWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
-
+        @Bean
+        public SecurityFilterChain protectedFilterChain(final HttpSecurity http) throws Exception {
             final SecurityFilter filter = new SecurityFilter(config);
 
             http
-                    .antMatcher("/protected/**")
+                    .securityMatcher("/protected/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(4)
-    public static class DbaWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class DbaWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain dbaFilterChain(final HttpSecurity http) throws Exception {
 
             final SecurityFilter filter = new SecurityFilter(config, "DirectBasicAuthClient");
 
             http
-                    .antMatcher("/dba/**")
+                    .securityMatcher("/dba/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(5)
-    public static class CallbackWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class CallbackWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain callbackFilterChain(final HttpSecurity http) throws Exception {
 
             final CallbackFilter callbackFilter = new CallbackFilter(config);
 
             http
-                    .antMatcher("/callback*")
+                    .securityMatcher("/callback*")
                     .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
                     .csrf().disable();
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(6)
-    public static class LogoutWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class LogoutWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain logoutFilterChain(final HttpSecurity http) throws Exception {
 
             final LogoutFilter logoutFilter = new LogoutFilter(config, "/?defaulturlafterlogout");
             logoutFilter.setDestroySession(true);
 
             http
-                    .antMatcher("/pac4jLogout")
+                    .securityMatcher("/pac4jLogout")
                     .addFilterBefore(logoutFilter, BasicAuthenticationFilter.class)
                     .csrf().disable();
+
+            return http.build();
         }
     }
 
     @Configuration
     @Order(7)
-    public static class SpringSecurityWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class SpringSecurityWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
 
-        protected void configure(final HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {
 
             http
                     .csrf().disable()
-                    .authorizeRequests()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .antMatchers("/login/**").authenticated()
+                    .authorizeHttpRequests()
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/login/**").authenticated()
                     .anyRequest().permitAll()
                     .and()
                     .formLogin()
@@ -152,18 +168,23 @@ public class SecurityConfig {
                     .failureUrl("/login.html?error=true")
                     .and()
                     .logout().logoutSuccessUrl("/");
-        }
 
-        protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.inMemoryAuthentication()
-                    .withUser("user").password(passwordEncoder().encode("user")).roles("USER")
-                    .and()
-                    .withUser("admin").password(passwordEncoder().encode("admin")).roles("ADMIN");
+            return http.build();
         }
 
         @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
+        public InMemoryUserDetailsManager userDetailsService() {
+            final UserDetails user1 = User.withDefaultPasswordEncoder()
+                    .username("user")
+                    .password("user")
+                    .roles("USER")
+                    .build();
+            final UserDetails user2 = User.withDefaultPasswordEncoder()
+                    .username("admin")
+                    .password("admin")
+                    .roles("ADMIN")
+                    .build();
+            return new InMemoryUserDetailsManager(user1, user2);
         }
     }
 }

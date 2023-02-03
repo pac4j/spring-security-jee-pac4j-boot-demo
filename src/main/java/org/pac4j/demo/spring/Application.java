@@ -1,5 +1,7 @@
 package org.pac4j.demo.spring;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.jee.context.JEEContext;
@@ -12,8 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Controller
