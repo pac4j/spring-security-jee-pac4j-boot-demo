@@ -7,7 +7,6 @@ import org.pac4j.jee.filter.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,7 +20,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig {
 
     @Configuration
-    @Order(1)
     public static class TwitterWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -41,7 +39,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(2)
     public static class CasWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -61,7 +58,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(3)
     public static class ProtectedWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -81,7 +77,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(4)
     public static class DbaWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -102,7 +97,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(5)
     public static class CallbackWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -123,7 +117,6 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(6)
     public static class LogoutWebSecurityConfigurationAdapter {
 
         @Autowired
@@ -145,8 +138,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(7)
-    public static class SpringSecurityWebSecurityConfigurationAdapter {
+    public static class ZeLastWebSecurityConfigurationAdapter {
 
         @Autowired
         private Config config;
