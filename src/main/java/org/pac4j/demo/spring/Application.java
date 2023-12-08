@@ -34,10 +34,10 @@ public class Application {
     @RequestMapping("/index.html")
     public String index(Map<String, Object> map, final HttpServletRequest request, final HttpServletResponse response) throws HttpAction {
         final JEEContext jeeContext = new JEEContext(request, response);
-        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, JEESessionStore.INSTANCE);
+        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, new JEESessionStore());
         map.put(PROFILES, profileManager.getProfiles());
         map.put(CONTEXT, SecurityContextHolder.getContext());
-        map.put(SESSION_ID, JEESessionStore.INSTANCE.getSessionId(jeeContext, false).orElse("nosession"));
+        map.put(SESSION_ID, new JEESessionStore().getSessionId(jeeContext, false).orElse("nosession"));
         return "index";
     }
 
@@ -50,7 +50,7 @@ public class Application {
             "/protected/index.html", "/admin/index.html", "/login/index.html"})
     public String twitter(Map<String, Object> map, final HttpServletRequest request, final HttpServletResponse response) {
         final JEEContext jeeContext = new JEEContext(request, response);
-        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, JEESessionStore.INSTANCE);
+        final SpringSecurityProfileManager profileManager = new SpringSecurityProfileManager(jeeContext, new JEESessionStore());
         map.put(PROFILES, profileManager.getProfiles());
         map.put(CONTEXT, SecurityContextHolder.getContext());
         return "protectedIndex";
