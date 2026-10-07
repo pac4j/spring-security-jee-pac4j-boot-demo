@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -32,7 +34,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/twitter/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
             return http.build();
         }
@@ -51,7 +53,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/cas/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
             return http.build();
         }
@@ -70,7 +72,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/protected/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
             return http.build();
         }
@@ -90,7 +92,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/dba/**")
                     .addFilterBefore(filter, BasicAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.NEVER));
 
             return http.build();
         }
@@ -110,7 +112,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/callback*")
                     .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
-                    .csrf().disable();
+                    .csrf(csrf -> csrf.disable());
 
             return http.build();
         }
@@ -131,7 +133,7 @@ public class SecurityConfig {
             http
                     .securityMatcher("/pac4jLogout")
                     .addFilterBefore(logoutFilter, BasicAuthenticationFilter.class)
-                    .csrf().disable();
+                    .csrf(csrf -> csrf.disable());
 
             return http.build();
         }
@@ -147,36 +149,41 @@ public class SecurityConfig {
         public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {
 
             http
-                    .csrf().disable()
-                    .authorizeHttpRequests()
-                    .requestMatchers("/admin/**").hasRole("ADMIN")
-                    .requestMatchers("/login/**").authenticated()
-                    .anyRequest().permitAll()
-                    .and()
-                    .formLogin()
-                    .loginPage("/login.html")
-                    .loginProcessingUrl("/perform_login")
-                    .defaultSuccessUrl("/index.html", false)
-                    .failureUrl("/login.html?error=true")
-                    .and()
-                    .logout().logoutSuccessUrl("/");
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(authz -> authz
+                            .requestMatchers("/admin/**").hasRole("ADMIN")
+                            .requestMatchers("/login/**").authenticated()
+                            .anyRequest().permitAll()
+                    )
+                    .formLogin(form -> form
+                            .loginPage("/login.html")
+                            .loginProcessingUrl("/perform_login")
+                            .defaultSuccessUrl("/index.html", false)
+                            .failureUrl("/login.html?error=true")
+                    )
+                    .logout(logout -> logout.logoutSuccessUrl("/"));
 
             return http.build();
         }
 
         @Bean
-        public InMemoryUserDetailsManager userDetailsService() {
-            final UserDetails user1 = User.withDefaultPasswordEncoder()
+        public InMemoryUserDetailsManager userDetailsService(final PasswordEncoder passwordEncoder) {
+            final UserDetails user1 = User.builder()
                     .username("user")
-                    .password("user")
+                    .password(passwordEncoder.encode("user"))
                     .roles("USER")
                     .build();
-            final UserDetails user2 = User.withDefaultPasswordEncoder()
+            final UserDetails user2 = User.builder()
                     .username("admin")
-                    .password("admin")
+                    .password(passwordEncoder.encode("admin"))
                     .roles("ADMIN")
                     .build();
             return new InMemoryUserDetailsManager(user1, user2);
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
         }
     }
 }
